@@ -369,8 +369,11 @@ test('transport.produce() succeeds', async () =>
 			payloadType  : 111,
 			clockRate    : 48000,
 			channels     : 2,
-			rtcpFeedback : [],
-			parameters   :
+			rtcpFeedback :
+			[
+				{ type: 'transport-cc', parameter: '' }
+			],
+			parameters :
 			{
 				minptime     : 10,
 				useinbandfec : 1
@@ -381,14 +384,14 @@ test('transport.produce() succeeds', async () =>
 	expect(headerExtensions).toEqual(
 		[
 			{
-				uri        : 'urn:ietf:params:rtp-hdrext:ssrc-audio-level',
-				id         : 10,
+				uri        : 'urn:ietf:params:rtp-hdrext:sdes:mid',
+				id         : 1,
 				encrypt    : false,
 				parameters : {}
 			},
 			{
-				uri        : 'urn:ietf:params:rtp-hdrext:sdes:mid',
-				id         : 9,
+				uri        : 'urn:ietf:params:rtp-hdrext:ssrc-audio-level',
+				id         : 10,
 				encrypt    : false,
 				parameters : {}
 			}
@@ -439,10 +442,10 @@ test('transport.produce() succeeds', async () =>
 			mimeType     : 'video/VP8',
 			payloadType  : 96,
 			clockRate    : 90000,
-			channels     : 1,
 			rtcpFeedback :
 			[
 				{ type: 'goog-remb', parameter: '' },
+				{ type: 'transport-cc', parameter: '' },
 				{ type: 'ccm', parameter: 'fir' },
 				{ type: 'nack', parameter: '' },
 				{ type: 'nack', parameter: 'pli' }
@@ -457,7 +460,6 @@ test('transport.produce() succeeds', async () =>
 			mimeType     : 'video/rtx',
 			payloadType  : 97,
 			clockRate    : 90000,
-			channels     : 1,
 			rtcpFeedback : [],
 			parameters   :
 			{
@@ -469,8 +471,8 @@ test('transport.produce() succeeds', async () =>
 	expect(headerExtensions).toEqual(
 		[
 			{
-				uri        : 'urn:ietf:params:rtp-hdrext:toffset',
-				id         : 2,
+				uri        : 'urn:ietf:params:rtp-hdrext:sdes:mid',
+				id         : 1,
 				encrypt    : false,
 				parameters : {}
 			},
@@ -481,14 +483,20 @@ test('transport.produce() succeeds', async () =>
 				parameters : {}
 			},
 			{
+				uri        : 'http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01',
+				id         : 5,
+				encrypt    : false,
+				parameters : {}
+			},
+			{
 				uri        : 'urn:3gpp:video-orientation',
 				id         : 4,
 				encrypt    : false,
 				parameters : {}
 			},
 			{
-				uri        : 'urn:ietf:params:rtp-hdrext:sdes:mid',
-				id         : 9,
+				uri        : 'urn:ietf:params:rtp-hdrext:toffset',
+				id         : 2,
 				encrypt    : false,
 				parameters : {}
 			}
@@ -608,8 +616,11 @@ test('transport.consume() succeeds', async () =>
 			payloadType  : 100,
 			clockRate    : 48000,
 			channels     : 2,
-			rtcpFeedback : [],
-			parameters   :
+			rtcpFeedback :
+			[
+				{ type: 'transport-cc', parameter: '' }
+			],
+			parameters :
 			{
 				useinbandfec : 1,
 				foo          : 'bar'
@@ -620,8 +631,20 @@ test('transport.consume() succeeds', async () =>
 	expect(headerExtensions).toEqual(
 		[
 			{
-				uri        : 'urn:ietf:params:rtp-hdrext:ssrc-audio-level',
+				uri        : 'urn:ietf:params:rtp-hdrext:sdes:mid',
 				id         : 1,
+				encrypt    : false,
+				parameters : {}
+			},
+			{
+				uri        : 'http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01',
+				id         : 5,
+				encrypt    : false,
+				parameters : {}
+			},
+			{
+				uri        : 'urn:ietf:params:rtp-hdrext:ssrc-audio-level',
+				id         : 10,
 				encrypt    : false,
 				parameters : {}
 			}
@@ -666,13 +689,13 @@ test('transport.consume() succeeds', async () =>
 			mimeType     : 'video/VP8',
 			payloadType  : 101,
 			clockRate    : 90000,
-			channels     : 1,
 			rtcpFeedback :
 			[
 				{ type: 'nack', parameter: '' },
 				{ type: 'nack', parameter: 'pli' },
 				{ type: 'ccm', parameter: 'fir' },
-				{ type: 'goog-remb', parameter: '' }
+				{ type: 'goog-remb', parameter: '' },
+				{ type: 'transport-cc', parameter: '' }
 			],
 			parameters :
 			{
@@ -684,7 +707,6 @@ test('transport.consume() succeeds', async () =>
 			mimeType     : 'video/rtx',
 			payloadType  : 102,
 			clockRate    : 90000,
-			channels     : 1,
 			rtcpFeedback : [],
 			parameters   :
 			{
@@ -696,20 +718,32 @@ test('transport.consume() succeeds', async () =>
 	expect(headerExtensions).toEqual(
 		[
 			{
-				uri        : 'urn:ietf:params:rtp-hdrext:toffset',
-				id         : 2,
+				uri        : 'urn:ietf:params:rtp-hdrext:sdes:mid',
+				id         : 1,
 				encrypt    : false,
 				parameters : {}
 			},
 			{
 				uri        : 'http://www.webrtc.org/experiments/rtp-hdrext/abs-send-time',
-				id         : 3,
+				id         : 4,
+				encrypt    : false,
+				parameters : {}
+			},
+			{
+				uri        : 'http://www.ietf.org/id/draft-holmer-rmcat-transport-wide-cc-extensions-01',
+				id         : 5,
 				encrypt    : false,
 				parameters : {}
 			},
 			{
 				uri        : 'urn:3gpp:video-orientation',
-				id         : 4,
+				id         : 11,
+				encrypt    : false,
+				parameters : {}
+			},
+			{
+				uri        : 'urn:ietf:params:rtp-hdrext:toffset',
+				id         : 12,
 				encrypt    : false,
 				parameters : {}
 			}
@@ -1037,7 +1071,7 @@ test('producer.resume() succeeds', () =>
 	expect(videoProducer.paused).toBe(false);
 }, 500);
 
-test('producer.replaceTrack() succeeds', async () =>
+test('producer.replaceTrack() with a new track succeeds', async () =>
 {
 	// Have the audio Producer paused.
 	audioProducer.pause();
@@ -1074,13 +1108,43 @@ test('producer.replaceTrack() succeeds', async () =>
 	expect(videoProducer.paused).toBe(false);
 }, 500);
 
-test('producer.replaceTrack() without track rejects with TypeError', async () =>
+test('producer.replaceTrack() with null succeeds', async () =>
 {
-	await expect(videoProducer.replaceTrack({}))
-		.rejects
-		.toThrow(TypeError);
+	// Have the audio Producer paused.
+	audioProducer.pause();
 
-	expect(videoProducer.track.readyState).toBe('live');
+	const audioProducerPreviousTrack = audioProducer.track;
+
+	await expect(audioProducer.replaceTrack({ track: null }))
+		.resolves
+		.toBe(undefined);
+
+	// Previous track must be 'live' due to stopTracks: false.
+	expect(audioProducerPreviousTrack.readyState).toBe('live');
+	expect(audioProducer.track).toBeNull();
+	// Producer was already paused.
+	expect(audioProducer.paused).toBe(true);
+
+	// Reset the audio paused state.
+	audioProducer.resume();
+
+	expect(audioProducer.paused).toBe(false);
+
+	// Manually "mute" the original audio track.
+	audioProducerPreviousTrack.enabled = false;
+
+	// Set the original audio track back.
+	await expect(audioProducer.replaceTrack({ track: audioProducerPreviousTrack }))
+		.resolves
+		.toBe(undefined);
+
+	// The given audio track was muted but the Producer was not, so the track
+	// must not be muted now.
+	expect(audioProducer.paused).toBe(false);
+	expect(audioProducerPreviousTrack.enabled).toBe(true);
+
+	// Reset the audio paused state.
+	audioProducer.resume();
 }, 500);
 
 test('producer.replaceTrack() with an ended track rejects with InvalidStateError', async () =>

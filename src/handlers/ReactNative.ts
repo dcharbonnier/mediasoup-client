@@ -445,8 +445,10 @@ export class ReactNative extends HandlerInterface
 		await this._pc.setRemoteDescription(answer);
 	}
 
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	async replaceTrack(localId: string, track: MediaStreamTrack): Promise<void>
+	async replaceTrack(
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		localId: string, track: MediaStreamTrack | null
+	): Promise<void>
 	{
 		throw new UnsupportedError('not implemented');
 	}
@@ -607,7 +609,7 @@ export class ReactNative extends HandlerInterface
 		await this._pc.setLocalDescription(answer);
 
 		const stream = this._pc.getRemoteStreams()
-			.find((s: any) => s.id === streamId);
+			.find((s: MediaStream) => s.id === streamId);
 		const track = stream.getTrackById(localId);
 
 		if (!track)

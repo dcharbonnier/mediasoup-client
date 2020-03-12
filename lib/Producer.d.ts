@@ -1,8 +1,8 @@
 import { EnhancedEventEmitter } from './EnhancedEventEmitter';
-import { RtpParameters } from './RtpParameters';
+import { RtpParameters, RtpEncodingParameters } from './RtpParameters';
 export declare type ProducerOptions = {
     track?: MediaStreamTrack;
-    encodings?: RTCRtpEncodingParameters[];
+    encodings?: RtpEncodingParameters[];
     codecOptions?: ProducerCodecOptions;
     stopTracks?: boolean;
     appData?: any;
@@ -23,6 +23,7 @@ export declare class Producer extends EnhancedEventEmitter {
     private _closed;
     private readonly _rtpSender?;
     private _track;
+    private readonly _kind;
     private readonly _rtpParameters;
     private _paused;
     private _maxSpatialLayer;
@@ -31,7 +32,7 @@ export declare class Producer extends EnhancedEventEmitter {
     /**
      * @emits transportclose
      * @emits trackended
-     * @emits @replacetrack - (track: MediaStreamTrack)
+     * @emits @replacetrack - (track: MediaStreamTrack | null)
      * @emits @setmaxspatiallayer - (spatialLayer: string)
      * @emits @setrtpencodingparameters - (params: any)
      * @emits @getstats
@@ -69,7 +70,7 @@ export declare class Producer extends EnhancedEventEmitter {
     /**
      * The associated track.
      */
-    readonly track: MediaStreamTrack;
+    readonly track: MediaStreamTrack | null;
     /**
      * RTP parameters.
      */
@@ -102,7 +103,7 @@ export declare class Producer extends EnhancedEventEmitter {
     /**
      * Get associated RTCRtpSender stats.
      */
-    getStats(): Promise<any>;
+    getStats(): Promise<RTCStatsReport>;
     /**
      * Pauses sending media.
      */
@@ -112,10 +113,10 @@ export declare class Producer extends EnhancedEventEmitter {
      */
     resume(): void;
     /**
-     * Replaces the current track with a new one.
+     * Replaces the current track with a new one or null.
      */
     replaceTrack({ track }: {
-        track: MediaStreamTrack;
+        track: MediaStreamTrack | null;
     }): Promise<void>;
     /**
      * Sets the video max spatial layer to be sent.
@@ -124,7 +125,7 @@ export declare class Producer extends EnhancedEventEmitter {
     /**
      * Sets the DSCP value.
      */
-    setRtpEncodingParameters(params: any): Promise<void>;
+    setRtpEncodingParameters(params: RTCRtpEncodingParameters[]): Promise<void>;
     private _onTrackEnded;
     private _handleTrack;
     private _destroyTrack;

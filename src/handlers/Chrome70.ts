@@ -446,12 +446,21 @@ export class Chrome70 extends HandlerInterface
 		await this._pc.setRemoteDescription(answer);
 	}
 
-	async replaceTrack(localId: string, track: MediaStreamTrack): Promise<void>
+	async replaceTrack(
+		localId: string, track: MediaStreamTrack | null
+	): Promise<void>
 	{
 		this._assertSendDirection();
 
-		logger.debug(
-			'replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
+		if (track)
+		{
+			logger.debug(
+				'replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
+		}
+		else
+		{
+			logger.debug('replaceTrack() [localId:%s, no track]', localId);
+		}
 
 		const transceiver = this._mapMidTransceiver.get(localId);
 
@@ -476,7 +485,7 @@ export class Chrome70 extends HandlerInterface
 
 		const parameters = transceiver.sender.getParameters();
 
-		parameters.encodings.forEach((encoding: any, idx: number) =>
+		parameters.encodings.forEach((encoding: RTCRtpEncodingParameters, idx: number) =>
 		{
 			if (idx <= spatialLayer)
 				encoding.active = true;
@@ -502,7 +511,7 @@ export class Chrome70 extends HandlerInterface
 
 		const parameters = transceiver.sender.getParameters();
 
-		parameters.encodings.forEach((encoding: any, idx: number) =>
+		parameters.encodings.forEach((encoding: RTCRtpEncodingParameters, idx: number) =>
 		{
 			parameters.encodings[idx] = { ...encoding, ...params };
 		});
@@ -605,7 +614,7 @@ export class Chrome70 extends HandlerInterface
 
 		logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
 
-		const localId = String(this._mapMidTransceiver.size);
+		const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
 
 		this._remoteSdp.receive(
 			{
@@ -649,7 +658,7 @@ export class Chrome70 extends HandlerInterface
 		await this._pc.setLocalDescription(answer);
 
 		const transceiver = this._pc.getTransceivers()
-			.find((t: any) => t.mid === localId);
+			.find((t: RTCRtpTransceiver) => t.mid === localId);
 
 		if (!transceiver)
 			throw new Error('new RTCRtpTransceiver not found');

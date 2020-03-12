@@ -1,3 +1,4 @@
+import { MediaSection } from './MediaSection';
 import { IceParameters, IceCandidate, DtlsParameters, DtlsRole, PlainRtpParameters } from '../../Transport';
 import { ProducerCodecOptions } from '../../Producer';
 import { MediaKind, RtpParameters } from '../../RtpParameters';
@@ -9,7 +10,8 @@ export declare class RemoteSdp {
     private readonly _sctpParameters?;
     private readonly _plainRtpParameters?;
     private readonly _planB;
-    private _mediaSections;
+    private readonly _mediaSections;
+    private readonly _midToIndex;
     private _firstMid?;
     private readonly _sdpObject;
     constructor({ iceParameters, iceCandidates, dtlsParameters, sctpParameters, plainRtpParameters, planB }: {
@@ -24,11 +26,11 @@ export declare class RemoteSdp {
     updateDtlsRole(role: DtlsRole): void;
     getNextMediaSectionIdx(): {
         idx: number;
-        reuseMid: boolean;
+        reuseMid?: string;
     };
     send({ offerMediaObject, reuseMid, offerRtpParameters, answerRtpParameters, codecOptions, extmapAllowMixed }: {
         offerMediaObject: any;
-        reuseMid?: boolean;
+        reuseMid?: string;
         offerRtpParameters: RtpParameters;
         answerRtpParameters: RtpParameters;
         codecOptions?: ProducerCodecOptions;
@@ -54,8 +56,8 @@ export declare class RemoteSdp {
         oldDataChannelSpec?: boolean;
     }): void;
     getSdp(): string;
-    _addMediaSection(newMediaSection: any): void;
-    _replaceMediaSection(newMediaSection: any, reuseMid?: boolean): void;
+    _addMediaSection(newMediaSection: MediaSection): void;
+    _replaceMediaSection(newMediaSection: MediaSection, reuseMid?: string): void;
     _regenerateBundleMids(): void;
 }
 //# sourceMappingURL=RemoteSdp.d.ts.map

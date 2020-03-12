@@ -15,7 +15,7 @@ import {
 } from '../../RtpParameters';
 import { SctpParameters } from '../../SctpParameters';
 
-abstract class MediaSection
+export abstract class MediaSection
 {
 	// SDP media object.
 	protected readonly _mediaObject: any;
@@ -221,7 +221,9 @@ export class AnswerMediaSection extends MediaSection
 						} = codecOptions;
 
 						const offerCodec = offerRtpParameters.codecs
-							.find((c: any) => c.payloadType === codec.payloadType);
+							.find((c: RtpCodecParameters) => (
+								c.payloadType === codec.payloadType
+							));
 
 						switch (codec.mimeType.toLowerCase())
 						{
