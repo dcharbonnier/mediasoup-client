@@ -1,7 +1,7 @@
 import { EnhancedEventEmitter } from '../EnhancedEventEmitter';
 import { ProducerCodecOptions } from '../Producer';
 import { IceParameters, IceCandidate, DtlsParameters } from '../Transport';
-import { RtpCapabilities, RtpParameters, RtpEncodingParameters } from '../RtpParameters';
+import { RtpCapabilities, RtpCodecCapability, RtpParameters, RtpEncodingParameters } from '../RtpParameters';
 import { SctpCapabilities, SctpParameters, SctpStreamParameters } from '../SctpParameters';
 export declare type HandlerFactory = () => HandlerInterface;
 export declare type HandlerRunOptions = {
@@ -20,6 +20,7 @@ export declare type HandlerSendOptions = {
     track: MediaStreamTrack;
     encodings?: RtpEncodingParameters[];
     codecOptions?: ProducerCodecOptions;
+    codec?: RtpCodecCapability;
 };
 export declare type HandlerSendResult = {
     localId: string;
@@ -59,7 +60,7 @@ export declare abstract class HandlerInterface extends EnhancedEventEmitter {
      * @emits @connectionstatechange - (connectionState: ConnectionState)
      */
     constructor();
-    abstract readonly name: string;
+    abstract get name(): string;
     abstract close(): void;
     abstract getNativeRtpCapabilities(): Promise<RtpCapabilities>;
     abstract getNativeSctpCapabilities(): Promise<SctpCapabilities>;
