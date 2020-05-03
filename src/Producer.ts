@@ -15,6 +15,8 @@ export type ProducerOptions =
 	codecOptions?: ProducerCodecOptions;
 	codec?: RtpCodecCapability;
 	stopTracks?: boolean;
+	disableTrackOnPause?: boolean;
+	zeroRtpOnPause?: boolean;
 	appData?: any;
 }
 
@@ -55,6 +57,10 @@ export class Producer extends EnhancedEventEmitter
 	private _maxSpatialLayer: number | undefined;
 	// Whether the Producer should call stop() in given tracks.
 	private _stopTracks: boolean;
+	// Whether the Producer should set track.enabled = false when paused.
+	private _disableTrackOnPause: boolean;
+	// Whether we should replace the RTCRtpSender.track with null when paused.
+	private _zeroRtpOnPause: boolean;
 	// App custom data.
 	private readonly _appData: any;
 
@@ -75,6 +81,8 @@ export class Producer extends EnhancedEventEmitter
 			track,
 			rtpParameters,
 			stopTracks,
+			disableTrackOnPause,
+			zeroRtpOnPause,
 			appData
 		}:
 		{
@@ -84,6 +92,8 @@ export class Producer extends EnhancedEventEmitter
 			track: MediaStreamTrack;
 			rtpParameters: RtpParameters;
 			stopTracks: boolean;
+			disableTrackOnPause: boolean;
+			zeroRtpOnPause: boolean;
 			appData: any;
 		}
 	)
@@ -98,11 +108,16 @@ export class Producer extends EnhancedEventEmitter
 		this._track = track;
 		this._kind = track.kind as MediaKind;
 		this._rtpParameters = rtpParameters;
-		this._paused = !track.enabled;
+		this._paused = disableTrackOnPause ? !track.enabled : false;
 		this._maxSpatialLayer = undefined;
 		this._stopTracks = stopTracks;
+		this._disableTrackOnPause = disableTrackOnPause;
+		this._zeroRtpOnPause = zeroRtpOnPause;
 		this._appData = appData;
 		this._onTrackEnded = this._onTrackEnded.bind(this);
+
+		// NOTE: Minor issue. If zeroRtpOnPause is true, we cannot emit the
+		// '@replacetrack' event here, so RTCRtpSender.track won't be null.
 
 		this._handleTrack();
 	}
@@ -258,8 +273,16 @@ export class Producer extends EnhancedEventEmitter
 
 		this._paused = true;
 
-		if (this._track)
+		if (this._track && this._disableTrackOnPause)
+		{
 			this._track.enabled = false;
+		}
+
+		if (this._zeroRtpOnPause)
+		{
+			this.safeEmitAsPromise('@replacetrack', null)
+				.catch(() => {});
+		}
 	}
 
 	/**
@@ -278,8 +301,16 @@ export class Producer extends EnhancedEventEmitter
 
 		this._paused = false;
 
-		if (this._track)
+		if (this._track && this._disableTrackOnPause)
+		{
 			this._track.enabled = true;
+		}
+
+		if (this._zeroRtpOnPause)
+		{
+			this.safeEmitAsPromise('@replacetrack', this._track)
+				.catch(() => {});
+		}
 	}
 
 	/**
@@ -314,7 +345,10 @@ export class Producer extends EnhancedEventEmitter
 			return;
 		}
 
-		await this.safeEmitAsPromise('@replacetrack', track);
+		if (!this._zeroRtpOnPause || !this._paused)
+		{
+			await this.safeEmitAsPromise('@replacetrack', track);
+		}
 
 		// Destroy the previous track.
 		this._destroyTrack();
@@ -324,10 +358,13 @@ export class Producer extends EnhancedEventEmitter
 
 		// If this Producer was paused/resumed and the state of the new
 		// track does not match, fix it.
-		if (track && !this._paused)
-			this._track.enabled = true;
-		else if (track && this._paused)
-			this._track.enabled = false;
+		if (track && this._disableTrackOnPause)
+		{
+			if (!this._paused)
+				this._track.enabled = true;
+			else if (this._paused)
+				this._track.enabled = false;
+		}
 
 		// Handle the effective track.
 		this._handleTrack();

@@ -398,6 +398,8 @@ export class Transport extends EnhancedEventEmitter
 			codecOptions,
 			codec,
 			stopTracks = true,
+			disableTrackOnPause = true,
+			zeroRtpOnPause = false,
 			appData = {}
 		}: ProducerOptions = {}
 	): Promise<Producer>
@@ -483,7 +485,17 @@ export class Transport extends EnhancedEventEmitter
 						});
 
 					const producer = new Producer(
-						{ id, localId, rtpSender, track, rtpParameters, stopTracks, appData });
+						{
+							id,
+							localId,
+							rtpSender,
+							track,
+							rtpParameters,
+							stopTracks,
+							disableTrackOnPause,
+							zeroRtpOnPause,
+							appData
+						});
 
 					this._producers.set(producer.id, producer);
 					this._handleProducer(producer);
@@ -557,7 +569,15 @@ export class Transport extends EnhancedEventEmitter
 					await this._handler.receive({ trackId: id, kind, rtpParameters });
 
 				const consumer = new Consumer(
-					{ id, localId, producerId, rtpReceiver, track, rtpParameters, appData });
+					{
+						id,
+						localId,
+						producerId,
+						rtpReceiver,
+						track,
+						rtpParameters,
+						appData
+					});
 
 				this._consumers.set(consumer.id, consumer);
 				this._handleConsumer(consumer);
